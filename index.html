@@ -1,94 +1,43 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Monica Shop</title>
+  <meta charset="UTF-8" />
+  <title>Tienda de Ropa</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #333;
-      color: #fff;
-      padding: 15px;
-      text-align: center;
-    }
-    .productos {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin: 20px;
-    }
-    .producto {
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      width: 200px;
-      margin: 10px;
-      padding: 10px;
-      text-align: center;
-    }
-    .producto img {
-      max-width: 100%;
-      height: auto;
-    }
-    button {
-      background: #333;
-      color: #fff;
-      border: none;
-      padding: 8px 12px;
-      margin-top: 10px;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-    button:hover {
-      background: #555;
-    }
-    #adminPanel {
-      display: none;
-      background: #fff;
-      padding: 20px;
-      margin: 20px;
-      border: 1px solid #ccc;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 8px;
-      margin: 5px 0;
-    }
-    .contacto {
-      text-align: center;
-      margin: 20px;
-    }
-    .contacto a {
-      background: #25D366;
-      color: white;
-      padding: 10px 20px;
-      text-decoration: none;
-      border-radius: 5px;
-    }
+    body { margin:0; font-family: Arial, sans-serif; background:#f4f4f4; }
+    header { background:#333; color:#fff; padding:15px; display:flex; justify-content:space-between; align-items:center; }
+    header h1 { margin:0; font-size:1.2rem; }
+    header button, header a { background:#fff; color:#333; border:none; padding:8px 12px; border-radius:6px; text-decoration:none; cursor:pointer; }
+    header button:hover { background:#eee; }
+    .productos { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; padding:16px; }
+    .producto { background:#fff; border:1px solid #ccc; border-radius:8px; padding:10px; text-align:center; }
+    .producto img { width:100%; height:150px; object-fit:cover; }
+    #adminPanel { display:none; background:#fff; margin:20px; padding:20px; border:1px solid #ccc; border-radius:8px; }
+    #adminPanel input { width:100%; padding:8px; margin:5px 0; }
+    #adminPanel button { margin-top:10px; }
+    .contacto { text-align:center; margin:20px; }
+    .contacto a { background:#25D366; color:#fff; padding:10px 20px; border-radius:6px; text-decoration:none; }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>Monica Shop</h1>
-  <button onclick="loginAdmin()">Administrador</button>
+  <h1>Tienda Online de Ropa</h1>
+  <div>
+    <button onclick="loginAdmin()">Panel Admin</button>
+    <a href="https://wa.me/5356939025" target="_blank">WhatsApp</a>
+  </div>
 </header>
 
 <div class="productos" id="productos"></div>
 
 <div id="adminPanel">
   <h2>Panel de Administración</h2>
-  <form id="productForm">
-    <input type="text" id="nombre" placeholder="Nombre del producto" required>
-    <input type="text" id="precio" placeholder="Precio" required>
-    <input type="text" id="imagen" placeholder="URL de imagen" required>
-    <button type="submit">Añadir Producto</button>
-  </form>
+  <input type="text" id="nombre" placeholder="Nombre del producto" />
+  <input type="text" id="precio" placeholder="Precio" />
+  <input type="text" id="imagen" placeholder="URL de imagen" />
+  <button onclick="agregarProducto()">Añadir Producto</button>
   <h3>Lista de Productos</h3>
   <ul id="adminList"></ul>
 </div>
@@ -97,93 +46,85 @@
   <a href="https://wa.me/5356939025" target="_blank">Contactar al +53 56939025</a>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  let productos = JSON.parse(localStorage.getItem("productos")) || [
-    {nombre:"Camisa Blanca", precio:"15 USD", imagen:"https://via.placeholder.com/150"},
-    {nombre:"Pantalón Negro", precio:"20 USD", imagen:"https://via.placeholder.com/150"},
-    {nombre:"Vestido Rojo", precio:"25 USD", imagen:"https://via.placeholder.com/150"},
-    {nombre:"Zapatos Deportivos", precio:"30 USD", imagen:"https://via.placeholder.com/150"},
-    {nombre:"Chaqueta Azul", precio:"35 USD", imagen:"https://via.placeholder.com/150"},
-    {nombre:"Falda Negra", precio:"18 USD", imagen:"https://via.placeholder.com/150"},
-    {nombre:"Sombrero", precio:"10 USD", imagen:"https://via.placeholder.com/150"},
-    {nombre:"Bufanda", precio:"8 USD", imagen:"https://via.placeholder.com/150"},
-    {nombre:"Guantes", precio:"12 USD", imagen:"https://via.placeholder.com/150"},
-    {nombre:"Camisa Negra", precio:"15 USD", imagen:"https://via.placeholder.com/150"},
-    {nombre:"Pantalón Azul", precio:"20 USD", imagen:"https://via.placeholder.com/150"},
-    {nombre:"Vestido Verde", precio:"25 USD", imagen:"https://via.placeholder.com/150"},
-    {nombre:"Zapatos Formales", precio:"40 USD", imagen:"https://via.placeholder.com/150"},
-    {nombre:"Chaqueta Negra", precio:"35 USD", imagen:"https://via.placeholder.com/150"},
-    {nombre:"Falda Roja", precio:"18 USD", imagen:"https://via.placeholder.com/150"},
-    {nombre:"Sombrero de Paja", precio:"10 USD", imagen:"https://via.placeholder.com/150"},
-    {nombre:"Bufanda Roja", precio:"8 USD", imagen:"https://via.placeholder.com/150"},
-    {nombre:"Guantes de Cuero", precio:"20 USD", imagen:"https://via.placeholder.com/150"},
-    {nombre:"Camisa Azul", precio:"15 USD", imagen:"https://via.placeholder.com/150"},
-    {nombre:"Pantalón Gris", precio:"22 USD", imagen:"https://via.placeholder.com/150"}
-  ];
+  // Configuración Supabase
+  const supabaseUrl = "https://gqpvvjcysujjglorguig.supabase.co";
+  const supabaseKey = "sb_publishable_X7o0t6lOxZKdkK-YNXsbng_oCMy3y7z";
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-  function mostrarProductos() {
-    const contenedor = document.getElementById("productos");
-    contenedor.innerHTML = "";
-    productos.forEach((p, i) => {
-      contenedor.innerHTML += `
+  // Mostrar productos
+  async function mostrarProductos() {
+    const { data, error } = await supabase.from("productos").select("*").order("id",{ascending:true});
+    if(error){ console.error(error); return; }
+    const cont = document.getElementById("productos");
+    cont.innerHTML = "";
+    data.forEach(p=>{
+      cont.innerHTML += `
         <div class="producto">
-          <img src="${p.imagen}" alt="${p.nombre}">
+          <img src="${p.imagen||'https://via.placeholder.com/150'}" alt="${p.nombre}">
           <h4>${p.nombre}</h4>
           <p>${p.precio}</p>
         </div>
       `;
     });
-    localStorage.setItem("productos", JSON.stringify(productos));
+    mostrarAdminList(data);
   }
 
-  function loginAdmin() {
+  // Panel admin
+  function loginAdmin(){
     let pass = prompt("Introduce la contraseña:");
-    if(pass === "56370195") {
-      document.getElementById("adminPanel").style.display = "block";
-      mostrarAdminList();
+    if(pass==="56370195"){
+      document.getElementById("adminPanel").style.display="block";
+      mostrarProductos();
     } else {
       alert("Contraseña incorrecta");
     }
   }
 
-  function mostrarAdminList() {
-    const lista = document.getElementById("adminList");
-    lista.innerHTML = "";
-    productos.forEach((p, i) => {
-      lista.innerHTML += `
+  async function agregarProducto(){
+    const nombre=document.getElementById("nombre").value;
+    const precio=document.getElementById("precio").value;
+    const imagen=document.getElementById("imagen").value;
+    if(!nombre||!precio){ alert("Nombre y precio obligatorios"); return; }
+    const { error } = await supabase.from("productos").insert([{nombre,precio,imagen}]);
+    if(error){ console.error(error); alert("Error al añadir"); return; }
+    document.getElementById("nombre").value="";
+    document.getElementById("precio").value="";
+    document.getElementById("imagen").value="";
+    mostrarProductos();
+  }
+
+  async function eliminarProducto(id){
+    const { error } = await supabase.from("productos").delete().eq("id",id);
+    if(error){ console.error(error); alert("Error al eliminar"); return; }
+    mostrarProductos();
+  }
+
+  async function editarProducto(id,nombre,precio,imagen){
+    const nuevoNombre=prompt("Nuevo nombre:",nombre);
+    if(nuevoNombre===null) return;
+    const nuevoPrecio=prompt("Nuevo precio:",precio);
+    if(nuevoPrecio===null) return;
+    const nuevaImagen=prompt("Nueva URL de imagen:",imagen);
+    if(nuevaImagen===null) return;
+    const { error } = await supabase.from("productos").update({nombre:nuevoNombre,precio:nuevoPrecio,imagen:nuevaImagen}).eq("id",id);
+    if(error){ console.error(error); alert("Error al editar"); return; }
+    mostrarProductos();
+  }
+
+  function mostrarAdminList(data){
+    const lista=document.getElementById("adminList");
+    lista.innerHTML="";
+    data.forEach(p=>{
+      lista.innerHTML+=`
         <li>
-          ${p.nombre} - ${p.precio}
-          <button onclick="editarProducto(${i})">Editar</button>
-          <button onclick="eliminarProducto(${i})">Eliminar</button>
+          ${p.id} - ${p.nombre} (${p.precio})
+          <button onclick="editarProducto(${p.id},'${p.nombre}','${p.precio}','${p.imagen||''}')">Editar</button>
+          <button onclick="eliminarProducto(${p.id})">Eliminar</button>
         </li>
       `;
     });
-  }
-
-  document.getElementById("productForm").addEventListener("submit", function(e){
-    e.preventDefault();
-    const nombre = document.getElementById("nombre").value;
-    const precio = document.getElementById("precio").value;
-    const imagen = document.getElementById("imagen").value;
-    productos.push({nombre, precio, imagen});
-    mostrarProductos();
-    mostrarAdminList();
-    this.reset();
-  });
-
-  function eliminarProducto(i) {
-    productos.splice(i,1);
-    mostrarProductos();
-    mostrarAdminList();
-  }
-
-  function editarProducto(i) {
-    const nuevoNombre = prompt("Nuevo nombre:", productos[i].nombre);
-    const nuevoPrecio = prompt("Nuevo precio:", productos[i].precio);
-    const nuevaImagen = prompt("Nueva URL de imagen:", productos[i].imagen);
-    productos[i] = {nombre:nuevoNombre, precio:nuevoPrecio, imagen:nuevaImagen};
-    mostrarProductos();
-    mostrarAdminList();
   }
 
   mostrarProductos();
