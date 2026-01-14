@@ -25,7 +25,7 @@
 <header>
   <h1>Tienda Online de Ropa</h1>
   <div>
-    <button onclick="loginAdmin()">Panel Admin</button>
+    <button id="btnAdmin">Panel Admin</button>
     <a href="https://wa.me/5356939025" target="_blank">WhatsApp</a>
   </div>
 </header>
@@ -37,7 +37,7 @@
   <input type="text" id="nombre" placeholder="Nombre del producto" />
   <input type="text" id="precio" placeholder="Precio" />
   <input type="text" id="imagen" placeholder="URL de imagen" />
-  <button onclick="agregarProducto()">Añadir Producto</button>
+  <button id="btnAdd">Añadir Producto</button>
   <h3>Lista de Productos</h3>
   <ul id="adminList"></ul>
 </div>
@@ -72,7 +72,8 @@
   }
 
   // Panel admin
-  function loginAdmin(){
+  const btnAdmin = document.getElementById("btnAdmin");
+  btnAdmin.addEventListener("click", ()=>{
     let pass = prompt("Introduce la contraseña:");
     if(pass==="56370195"){
       document.getElementById("adminPanel").style.display="block";
@@ -80,9 +81,11 @@
     } else {
       alert("Contraseña incorrecta");
     }
-  }
+  });
 
-  async function agregarProducto(){
+  // Añadir producto
+  const btnAdd = document.getElementById("btnAdd");
+  btnAdd.addEventListener("click", async ()=>{
     const nombre=document.getElementById("nombre").value;
     const precio=document.getElementById("precio").value;
     const imagen=document.getElementById("imagen").value;
@@ -93,14 +96,16 @@
     document.getElementById("precio").value="";
     document.getElementById("imagen").value="";
     mostrarProductos();
-  }
+  });
 
+  // Eliminar producto
   async function eliminarProducto(id){
     const { error } = await supabase.from("productos").delete().eq("id",id);
     if(error){ console.error(error); alert("Error al eliminar"); return; }
     mostrarProductos();
   }
 
+  // Editar producto
   async function editarProducto(id,nombre,precio,imagen){
     const nuevoNombre=prompt("Nuevo nombre:",nombre);
     if(nuevoNombre===null) return;
@@ -113,6 +118,7 @@
     mostrarProductos();
   }
 
+  // Lista admin
   function mostrarAdminList(data){
     const lista=document.getElementById("adminList");
     lista.innerHTML="";
@@ -127,10 +133,9 @@
     });
   }
 
+  // Cargar productos al inicio
   mostrarProductos();
 </script>
 
 </body>
 </html>
-
-
