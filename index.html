@@ -65,33 +65,39 @@
 
   // Mostrar productos
   async function mostrarProductos() {
-    const { data, error } = await supabase.from("productos").select("*").order("id",{ascending:true});
-    if(error){ showError("Error cargando productos: "+error.message); return; }
-    const cont = document.getElementById("productos");
-    cont.innerHTML = "";
-    if(!data || data.length===0){
-      cont.innerHTML="<p style='grid-column:1/-1;text-align:center;color:#666;'>No hay productos aún.</p>";
-    } else {
-      data.forEach(p=>{
-        cont.innerHTML += `
-          <div class="producto">
-            <img src="${p.imagen||'https://via.placeholder.com/150'}" alt="${p.nombre}">
-            <h4>${p.nombre}</h4>
-            <p>${p.precio}</p>
-          </div>
-        `;
-      });
+    try {
+      const { data, error } = await supabase.from("productos").select("*").order("id",{ascending:true});
+      if(error){ showError("Error cargando productos: "+error.message); return; }
+      const cont = document.getElementById("productos");
+      cont.innerHTML = "";
+      if(!data || data.length===0){
+        cont.innerHTML="<p style='grid-column:1/-1;text-align:center;color:#666;'>No hay productos aún.</p>";
+      } else {
+        data.forEach(p=>{
+          cont.innerHTML += `
+            <div class="producto">
+              <img src="${p.imagen||'https://via.placeholder.com/150'}" alt="${p.nombre}">
+              <h4>${p.nombre}</h4>
+              <p>${p.precio}</p>
+            </div>
+          `;
+        });
+      }
+      mostrarAdminList(data||[]);
+    } catch(e){
+      showError("Error inesperado: "+e.message);
     }
-    mostrarAdminList(data||[]);
   }
 
-  // Panel admin
+  // Panel admin SIEMPRE se abre aunque falle Supabase
   const btnAdmin = document.getElementById("btnAdmin");
   btnAdmin.addEventListener("click", ()=>{
     let pass = prompt("Introduce la contraseña:");
     if(pass==="56370195"){
       document.getElementById("adminPanel").style.display="block";
-      mostrarProductos();
+      mostrarProductos().catch(e=>{
+        showError("El panel se abrió, pero hubo error cargando productos: "+e.message);
+      });
     } else {
       alert("Contraseña incorrecta");
     }
@@ -104,19 +110,27 @@
     const precio=document.getElementById("precio").value.trim();
     const imagen=document.getElementById("imagen").value.trim();
     if(!nombre||!precio){ alert("Nombre y precio obligatorios"); return; }
-    const { error } = await supabase.from("productos").insert([{nombre,precio,imagen}]);
-    if(error){ showError("Error al añadir: "+error.message); return; }
-    document.getElementById("nombre").value="";
-    document.getElementById("precio").value="";
-    document.getElementById("imagen").value="";
-    mostrarProductos();
+    try {
+      const { error } = await supabase.from("productos").insert([{nombre,precio,imagen}]);
+      if(error){ showError("Error al añadir: "+error.message); return; }
+      document.getElementById("nombre").value="";
+      document.getElementById("precio").value="";
+      document.getElementById("imagen").value="";
+      mostrarProductos();
+    } catch(e){
+      showError("Error inesperado al añadir: "+e.message);
+    }
   });
 
   // Eliminar producto
   async function eliminarProducto(id){
-    const { error } = await supabase.from("productos").delete().eq("id",id);
-    if(error){ showError("Error al eliminar: "+error.message); return; }
-    mostrarProductos();
+    try {
+      const { error } = await supabase.from("productos").delete().eq("id",id);
+      if(error){ showError("Error al eliminar: "+error.message); return; }
+      mostrarProductos();
+    } catch(e){
+      showError("Error inesperado al eliminar: "+e.message);
+    }
   }
 
   // Editar producto
@@ -127,9 +141,13 @@
     if(nuevoPrecio===null) return;
     const nuevaImagen=prompt("Nueva URL de imagen:",imagen);
     if(nuevaImagen===null) return;
-    const { error } = await supabase.from("productos").update({nombre:nuevoNombre,precio:nuevoPrecio,imagen:nuevaImagen}).eq("id",id);
-    if(error){ showError("Error al editar: "+error.message); return; }
-    mostrarProductos();
+    try {
+      const { error } = await supabase.from("productos").update({nombre:nuevoNombre,precio:nuevoPrecio,imagen:nuevaImagen}).eq("id",id);
+      if(error){ showError("Error al editar: "+error.message); return; }
+      mostrarProductos();
+    } catch(e){
+      showError("Error inesperado al editar: "+e.message);
+    }
   }
 
   // Lista admin
