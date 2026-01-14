@@ -1,178 +1,27 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Tienda de Ropa</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body { margin:0; font-family: Arial, sans-serif; background:#f4f4f4; }
-    header { background:#333; color:#fff; padding:15px; display:flex; justify-content:space-between; align-items:center; }
-    header h1 { margin:0; font-size:1.2rem; }
-    header button, header a { background:#fff; color:#333; border:none; padding:8px 12px; border-radius:6px; text-decoration:none; cursor:pointer; }
-    header button:hover { background:#eee; }
-    .productos { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; padding:16px; }
-    .producto { background:#fff; border:1px solid #ccc; border-radius:8px; padding:10px; text-align:center; }
-    .producto img { width:100%; height:150px; object-fit:cover; }
-    #adminPanel { display:none; background:#fff; margin:20px; padding:20px; border:1px solid #ccc; border-radius:8px; }
-    #adminPanel input { width:100%; padding:8px; margin:5px 0; }
-    #adminPanel button { margin-top:10px; }
-    .contacto { text-align:center; margin:20px; }
-    .contacto a { background:#25D366; color:#fff; padding:10px 20px; border-radius:6px; text-decoration:none; }
-    .error { background:#c0392b; color:#fff; padding:10px; margin:10px; border-radius:6px; display:none; }
-  </style>
+  <meta charset="UTF-8">
+  <title>Prueba Panel</title>
 </head>
 <body>
-
-<header>
-  <h1>Tienda Online de Ropa</h1>
-  <div>
-    <button id="btnAdmin">Panel Admin</button>
-    <a href="https://wa.me/5356939025" target="_blank">WhatsApp</a>
+  <button id="btnAdmin">Panel Admin</button>
+  <div id="adminPanel" style="display:none; background:#eee; padding:20px; margin:20px;">
+    <h2>Panel de Administración</h2>
+    <p>Contenido del panel...</p>
   </div>
-</header>
 
-<div id="errorBox" class="error"></div>
-
-<div class="productos" id="productos"></div>
-
-<div id="adminPanel">
-  <h2>Panel de Administración</h2>
-  <input type="text" id="nombre" placeholder="Nombre del producto" />
-  <input type="text" id="precio" placeholder="Precio" />
-  <input type="text" id="imagen" placeholder="URL de imagen" />
-  <button id="btnAdd">Añadir Producto</button>
-  <h3>Lista de Productos</h3>
-  <ul id="adminList"></ul>
-</div>
-
-<div class="contacto">
-  <a href="https://wa.me/5356939025" target="_blank">Contactar al +53 56939025</a>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  // Configuración Supabase
-  const supabaseUrl = "https://gqpvvjcysujjglorguig.supabase.co";
-  const supabaseKey = "sb_publishable_X7o0t6lOxZKdkK-YNXsbng_oCMy3y7z";
-  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-  function showError(msg){
-    console.error(msg);
-    const box=document.getElementById("errorBox");
-    box.textContent=msg;
-    box.style.display="block";
-  }
-
-  // Mostrar productos
-  async function mostrarProductos() {
-    try {
-      const { data, error } = await supabase.from("productos").select("*").order("id",{ascending:true});
-      if(error){ showError("Error cargando productos: "+error.message); return; }
-      const cont = document.getElementById("productos");
-      cont.innerHTML = "";
-      if(!data || data.length===0){
-        cont.innerHTML="<p style='grid-column:1/-1;text-align:center;color:#666;'>No hay productos aún.</p>";
+  <script>
+    document.getElementById("btnAdmin").addEventListener("click", ()=>{
+      let pass = prompt("Introduce la contraseña:");
+      if(pass==="56370195"){
+        document.getElementById("adminPanel").style.display="block";
       } else {
-        data.forEach(p=>{
-          cont.innerHTML += `
-            <div class="producto">
-              <img src="${p.imagen||'https://via.placeholder.com/150'}" alt="${p.nombre}">
-              <h4>${p.nombre}</h4>
-              <p>${p.precio}</p>
-            </div>
-          `;
-        });
+        alert("Contraseña incorrecta");
       }
-      mostrarAdminList(data||[]);
-    } catch(e){
-      showError("Error inesperado: "+e.message);
-    }
-  }
-
-  // Panel admin SIEMPRE se abre aunque falle Supabase
-  const btnAdmin = document.getElementById("btnAdmin");
-  btnAdmin.addEventListener("click", ()=>{
-    let pass = prompt("Introduce la contraseña:");
-    if(pass==="56370195"){
-      document.getElementById("adminPanel").style.display="block";
-      mostrarProductos().catch(e=>{
-        showError("El panel se abrió, pero hubo error cargando productos: "+e.message);
-      });
-    } else {
-      alert("Contraseña incorrecta");
-    }
-  });
-
-  // Añadir producto
-  const btnAdd = document.getElementById("btnAdd");
-  btnAdd.addEventListener("click", async ()=>{
-    const nombre=document.getElementById("nombre").value.trim();
-    const precio=document.getElementById("precio").value.trim();
-    const imagen=document.getElementById("imagen").value.trim();
-    if(!nombre||!precio){ alert("Nombre y precio obligatorios"); return; }
-    try {
-      const { error } = await supabase.from("productos").insert([{nombre,precio,imagen}]);
-      if(error){ showError("Error al añadir: "+error.message); return; }
-      document.getElementById("nombre").value="";
-      document.getElementById("precio").value="";
-      document.getElementById("imagen").value="";
-      mostrarProductos();
-    } catch(e){
-      showError("Error inesperado al añadir: "+e.message);
-    }
-  });
-
-  // Eliminar producto
-  async function eliminarProducto(id){
-    try {
-      const { error } = await supabase.from("productos").delete().eq("id",id);
-      if(error){ showError("Error al eliminar: "+error.message); return; }
-      mostrarProductos();
-    } catch(e){
-      showError("Error inesperado al eliminar: "+e.message);
-    }
-  }
-
-  // Editar producto
-  async function editarProducto(id,nombre,precio,imagen){
-    const nuevoNombre=prompt("Nuevo nombre:",nombre);
-    if(nuevoNombre===null) return;
-    const nuevoPrecio=prompt("Nuevo precio:",precio);
-    if(nuevoPrecio===null) return;
-    const nuevaImagen=prompt("Nueva URL de imagen:",imagen);
-    if(nuevaImagen===null) return;
-    try {
-      const { error } = await supabase.from("productos").update({nombre:nuevoNombre,precio:nuevoPrecio,imagen:nuevaImagen}).eq("id",id);
-      if(error){ showError("Error al editar: "+error.message); return; }
-      mostrarProductos();
-    } catch(e){
-      showError("Error inesperado al editar: "+e.message);
-    }
-  }
-
-  // Lista admin
-  function mostrarAdminList(data){
-    const lista=document.getElementById("adminList");
-    lista.innerHTML="";
-    if(!data || data.length===0){
-      lista.innerHTML="<li>No hay productos</li>";
-      return;
-    }
-    data.forEach(p=>{
-      lista.innerHTML+=`
-        <li>
-          ${p.id} - ${p.nombre} (${p.precio})
-          <button onclick="editarProducto(${p.id},'${p.nombre}','${p.precio}','${p.imagen||''}')">Editar</button>
-          <button onclick="eliminarProducto(${p.id})">Eliminar</button>
-        </li>
-      `;
     });
-  }
-
-  // Cargar productos al inicio
-  mostrarProductos();
-</script>
-
+  </script>
 </body>
 </html>
+
 
