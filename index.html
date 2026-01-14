@@ -18,6 +18,7 @@
     #adminPanel button { margin-top:10px; }
     .contacto { text-align:center; margin:20px; }
     .contacto a { background:#25D366; color:#fff; padding:10px 20px; border-radius:6px; text-decoration:none; }
+    .error { background:#c0392b; color:#fff; padding:10px; margin:10px; border-radius:6px; display:none; }
   </style>
 </head>
 <body>
@@ -29,6 +30,8 @@
     <a href="https://wa.me/5356939025" target="_blank">WhatsApp</a>
   </div>
 </header>
+
+<div id="errorBox" class="error"></div>
 
 <div class="productos" id="productos"></div>
 
@@ -53,22 +56,33 @@
   const supabaseKey = "sb_publishable_X7o0t6lOxZKdkK-YNXsbng_oCMy3y7z";
   const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
+  function showError(msg){
+    console.error(msg);
+    const box=document.getElementById("errorBox");
+    box.textContent=msg;
+    box.style.display="block";
+  }
+
   // Mostrar productos
   async function mostrarProductos() {
     const { data, error } = await supabase.from("productos").select("*").order("id",{ascending:true});
-    if(error){ console.error(error); alert("Error cargando productos"); return; }
+    if(error){ showError("Error cargando productos: "+error.message); return; }
     const cont = document.getElementById("productos");
     cont.innerHTML = "";
-    data.forEach(p=>{
-      cont.innerHTML += `
-        <div class="producto">
-          <img src="${p.imagen||'https://via.placeholder.com/150'}" alt="${p.nombre}">
-          <h4>${p.nombre}</h4>
-          <p>${p.precio}</p>
-        </div>
-      `;
-    });
-    mostrarAdminList(data);
+    if(!data || data.length===0){
+      cont.innerHTML="<p style='grid-column:1/-1;text-align:center;color:#666;'>No hay productos aún.</p>";
+    } else {
+      data.forEach(p=>{
+        cont.innerHTML += `
+          <div class="producto">
+            <img src="${p.imagen||'https://via.placeholder.com/150'}" alt="${p.nombre}">
+            <h4>${p.nombre}</h4>
+            <p>${p.precio}</p>
+          </div>
+        `;
+      });
+    }
+    mostrarAdminList(data||[]);
   }
 
   // Panel admin
@@ -86,12 +100,12 @@
   // Añadir producto
   const btnAdd = document.getElementById("btnAdd");
   btnAdd.addEventListener("click", async ()=>{
-    const nombre=document.getElementById("nombre").value;
-    const precio=document.getElementById("precio").value;
-    const imagen=document.getElementById("imagen").value;
+    const nombre=document.getElementById("nombre").value.trim();
+    const precio=document.getElementById("precio").value.trim();
+    const imagen=document.getElementById("imagen").value.trim();
     if(!nombre||!precio){ alert("Nombre y precio obligatorios"); return; }
     const { error } = await supabase.from("productos").insert([{nombre,precio,imagen}]);
-    if(error){ console.error(error); alert("Error al añadir"); return; }
+    if(error){ showError("Error al añadir: "+error.message); return; }
     document.getElementById("nombre").value="";
     document.getElementById("precio").value="";
     document.getElementById("imagen").value="";
@@ -101,7 +115,7 @@
   // Eliminar producto
   async function eliminarProducto(id){
     const { error } = await supabase.from("productos").delete().eq("id",id);
-    if(error){ console.error(error); alert("Error al eliminar"); return; }
+    if(error){ showError("Error al eliminar: "+error.message); return; }
     mostrarProductos();
   }
 
@@ -114,7 +128,7 @@
     const nuevaImagen=prompt("Nueva URL de imagen:",imagen);
     if(nuevaImagen===null) return;
     const { error } = await supabase.from("productos").update({nombre:nuevoNombre,precio:nuevoPrecio,imagen:nuevaImagen}).eq("id",id);
-    if(error){ console.error(error); alert("Error al editar"); return; }
+    if(error){ showError("Error al editar: "+error.message); return; }
     mostrarProductos();
   }
 
@@ -122,6 +136,10 @@
   function mostrarAdminList(data){
     const lista=document.getElementById("adminList");
     lista.innerHTML="";
+    if(!data || data.length===0){
+      lista.innerHTML="<li>No hay productos</li>";
+      return;
+    }
     data.forEach(p=>{
       lista.innerHTML+=`
         <li>
@@ -139,6 +157,4 @@
 
 </body>
 </html>
-
-
 
