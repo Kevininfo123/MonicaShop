@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Monica Online Shop</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin:0; padding:0; background:linear-gradient(to right,#f9f9f9,#e3f2fd);}
+    header { background:#4a148c; color:white; text-align:center; padding:15px;}
+    header h1 { margin:0;}
+    header button { background:#ff9800; border:none; padding:8px 15px; margin-top:10px; cursor:pointer; color:white; font-weight:bold; border-radius:5px;}
+    .productos { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; padding:20px;}
+    .producto { background:white; border:1px solid #ccc; border-radius:8px; padding:10px; text-align:center; box-shadow:2px 2px 5px rgba(0,0,0,0.1);}
+    .producto img { max-width:100%; border-radius:5px;}
+    .producto p { margin:5px 0; font-weight:bold;}
+    .producto span { color:#388e3c; font-weight:bold;}
+    .producto button { margin-top:8px; padding:6px 12px; background:#ff9800; border:none; color:white; cursor:pointer; border-radius:5px;}
+    #carrito { background:#fff3e0; padding:15px; border-top:3px solid #4a148c;}
+    #carrito h2 { margin-top:0;}
+    #carrito ul { list-style:none; padding:0;}
+    #carrito li { margin:5px 0;}
+    #carrito button { margin-left:10px; background:#d32f2f; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;}
+    #adminPanel { display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); background:#fff; border:3px solid #4a148c; padding:20px; width:350px; z-index:1000; border-radius:10px;}
+    #adminPanel input,#adminPanel button { margin:8px 0; width:100%; padding:8px;}
+    #adminPanel button { background:#4a148c; color:white; border:none; cursor:pointer; border-radius:5px;}
+    #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999;}
+    footer { background:#4a148c; color:white; text-align:center; padding:15px;}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>MonicaShopOnline</h1>
+    <button onclick="loginAdmin()">Panel Admin</button>
+  </header>
+
+  <section class="productos" id="productos">
+    <!-- 20 productos iniciales -->
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Camisa Blanca</p><span>$15</span><br><button onclick="agregarAlCarrito('Camisa Blanca',15)">Agregar al carrito</button></div>
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Pantalón Azul</p><span>$25</span><br><button onclick="agregarAlCarrito('Pantalón Azul',25)">Agregar al carrito</button></div>
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Vestido Rojo</p><span>$40</span><br><button onclick="agregarAlCarrito('Vestido Rojo',40)">Agregar al carrito</button></div>
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Chaqueta Negra</p><span>$60</span><br><button onclick="agregarAlCarrito('Chaqueta Negra',60)">Agregar al carrito</button></div>
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Zapatos Deportivos</p><span>$50</span><br><button onclick="agregarAlCarrito('Zapatos Deportivos',50)">Agregar al carrito</button></div>
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Falda Rosa</p><span>$20</span><br><button onclick="agregarAlCarrito('Falda Rosa',20)">Agregar al carrito</button></div>
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Camisa Azul</p><span>$18</span><br><button onclick="agregarAlCarrito('Camisa Azul',18)">Agregar al carrito</button></div>
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Pantalón Negro</p><span>$30</span><br><button onclick="agregarAlCarrito('Pantalón Negro',30)">Agregar al carrito</button></div>
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Vestido Verde</p><span>$35</span><br><button onclick="agregarAlCarrito('Vestido Verde',35)">Agregar al carrito</button></div>
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Chaqueta Marrón</p><span>$55</span><br><button onclick="agregarAlCarrito('Chaqueta Marrón',55)">Agregar al carrito</button></div>
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Sandalias</p><span>$22</span><br><button onclick="agregarAlCarrito('Sandalias',22)">Agregar al carrito</button></div>
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Camisa Negra</p><span>$17</span><br><button onclick="agregarAlCarrito('Camisa Negra',17)">Agregar al carrito</button></div>
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Pantalón Gris</p><span>$28</span><br><button onclick="agregarAlCarrito('Pantalón Gris',28)">Agregar al carrito</button></div>
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Vestido Amarillo</p><span>$38</span><br><button onclick="agregarAlCarrito('Vestido Amarillo',38)">Agregar al carrito</button></div>
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Chaqueta Azul</p><span>$65</span><br><button onclick="agregarAlCarrito('Chaqueta Azul',65)">Agregar al carrito</button></div>
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Zapatos Elegantes</p><span>$70</span><br><button onclick="agregarAlCarrito('Zapatos Elegantes',70)">Agregar al carrito</button></div>
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Falda Negra</p><span>$25</span><br><button onclick="agregarAlCarrito('Falda Negra',25)">Agregar al carrito</button></div>
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Camisa Roja</p><span>$19</span><br><button onclick="agregarAlCarrito('Camisa Roja',19)">Agregar al carrito</button></div>
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Pantalón Beige</p><span>$27</span><br><button onclick="agregarAlCarrito('Pantalón Beige',27)">Agregar al carrito</button></div>
+    <div class="producto"><img src="https://via.placeholder.com/150"><p>Vestido Blanco</p><span>$42</span><br><button onclick="agregarAlCarrito('Vestido Blanco',42)">Agregar al carrito</button></div>
+  </section>
+
+  <!-- Carrito -->
+  <section id="carrito">
+    <h2>?? Carrito de Compras</h2>
+    <ul id="listaCarrito"></ul>
+    <p><strong>Total:</strong> $<span id="total">0</span></p>
+  </section>
+
+  <!-- Overlay -->
+  <div id="overlay"></div>
+
+  <!-- Panel Admin -->
+  <div id="adminPanel">
+    <h2>Panel de Administración</h2>
+    <input type="text" id="nombreProducto"  placeholder="Nombre del Producto">
+    <input type="text" id="precioProducto" placeholder="Precio del producto">
+    <input type="text" id="imagenProducto" placeholder="URL de la imagen">
+    <button onclick="agregarProducto()">Agregar Producto</button>
+    <input type="number" id="indiceEliminar" placeholder="Número de producto a eliminar">
+    <button onclick="eliminarProducto()">Eliminar Producto</button>
+    <input type="number" id="indiceEditar" placeholder="Número de producto a editar">
+    <input type="text" id="nuevoNombre" placeholder="Nuevo nombre">
+    <input type="text" id="nuevoPrecio" placeholder="Nuevo precio">
+    <input type="text" id="nuevaImagen" placeholder="Nueva URL de imagen">
+    <button onclick="editarProducto()">Editar Producto</button>
+    <button onclick="cerrarAdmin()">Cerrar</button>
+  </div>
+
+  <footer>
+    <p>Contacto: +53 56939025</p>
+  </footer>
+
+  <script>
+    // --- Carrito ---
+    let carrito = [];
+    let total = 0;
+
+    function agregarAlCarrito(nombre, precio) {
+      carrito.push({nombre, precio});
+      total += precio;
+      actualizarCarrito();
+    }
+
+    function actualizarCarrito() {
+      const lista = document.getElementById("listaCarrito");
+      lista.innerHTML = "";
+      carrito.forEach((item, index) => {
+        let li = document.createElement("li");
+        li.textContent = `${item.nombre} - $${item.precio}`;
+        let btn = document.createElement("button");
+        btn.textContent = "Eliminar";
+        btn.onclick = () => eliminarDelCarrito(index);
+        li.appendChild(btn);
+        lista.appendChild(li);
+      });
+      document.getElementById("total").textContent = total;
+    }
+
+    function eliminarDelCarrito(indice) {
+      total -= carrito[indice].precio;
+      carrito.splice(indice, 1);
+      actualizarCarrito();
+    }
+
+    // --- Panel Admin ---
+    function loginAdmin() {
+      let pass = prompt("Ingrese la contraseña:");
+      if (pass === "56370195") {
+        document.getElementById("adminPanel").style.display = "block";
+        document.getElementById("overlay").style.display = "block";
+      } else {
+        alert("Contraseña incorrecta");
+      }
+    }
+
+    function cerrarAdmin() {
+      document.getElementById("adminPanel").style.display = "none";
+      document.getElementById("overlay").style.display = "none";
+    }
+
+    function agregarProducto() {
+      let nombre = document.getElementById("nombreProducto").value;
+      let precio = document.getElementById("precioProducto").value;
+      let imagen = document.getElementById("imagenProducto").value || "https://via.placeholder.com/150";
+      if (nombre.trim() === "" || precio.trim() === "") {
+        alert("Ingrese nombre y precio válidos");
+        return;
+      }
+      let div = document.createElement("div");
+      div.className = "producto";
+      div.innerHTML = `<img src="${imagen}" alt=""><p>${nombre}</p><span>$${precio}</span><br>
+        <button onclick="agregarAlCarrito('${nombre}',${precio})">Agregar al carrito</button>`;
+      document.getElementById("productos").appendChild(div);
+      alert("Producto agregado");
+    }
+
+    function eliminarProducto() {
+      let indice = parseInt(document.getElementById("indiceEliminar").value);
+      let productos = document.querySelectorAll("#productos .producto");
+      if (indice > 0 && indice <= productos.length) {
+        productos[indice - 1].remove();
+        alert("Producto eliminado");
+      } else {
+        alert("Número inválido");
+      }
+    }
+
+    function editarProducto() {
+      let indice = parseInt(document.getElementById("indiceEditar").value);
+      let productos = document.querySelectorAll("#productos .producto");
+      if (indice > 0 && indice <= productos.length) {
+        let producto = productos[indice - 1];
+        let nuevoNombre = document.getElementById("nuevoNombre").value;
+        let nuevoPrecio = document.getElementById("nuevoPrecio").value;
+        let nuevaImagen = document.getElementById("nuevaImagen").value;
+
+        if (nuevoNombre) producto.querySelector("p").textContent = nuevoNombre;
+        if (nuevoPrecio) producto.querySelector("span").textContent = `$${nuevoPrecio}`;
+        if (nuevaImagen) producto.querySelector("img").src = nuevaImagen;
+
+        // Actualizar botón del carrito con nuevos datos
+        let btn = producto.querySelector("button");
+        btn.setAttribute("onclick", `agregarAlCarrito('${nuevoNombre || producto.querySelector("p").textContent}', ${nuevoPrecio || producto.querySelector("span").textContent.replace('$','')})`);
+
+        alert("Producto editado");
+      } else {
+        alert("Número inválido");
+      }
+    }
+  </script>
+</body>
+</html>
